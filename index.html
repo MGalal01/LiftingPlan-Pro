@@ -1407,10 +1407,26 @@ function CraneAnalysisTab() {
   const [craneData, setCraneData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [apiKey, setApiKey] = useState(() => { try { return localStorage.getItem("liftplan_api_key") || ""; } catch(e) { return ""; } });
+  const [keyVisible, setKeyVisible] = useState(false);
+  const [keySaved, setKeySaved] = useState(false);
   const fileInputRef = useRef(null);
+
+  const saveKey = () => {
+    if (!apiKey.trim()) return;
+    try { localStorage.setItem("liftplan_api_key", apiKey.trim()); } catch(e) {}
+    setKeySaved(true);
+    setTimeout(() => setKeySaved(false), 2500);
+  };
 
   const handleFileUpload = useCallback(async (file) => {
     if (!file) return;
+    let key = apiKey.trim();
+    try { key = localStorage.getItem("liftplan_api_key") || key; } catch(e) {}
+    if (!key) {
+      setError("Please enter and save your Anthropic API key above before uploading.");
+      return;
+    }
     setCraneFile(file); setLoading(true); setError(null); setCraneData(null);
     try {
       const base64 = await new Promise((res,rej)=>{
@@ -1429,17 +1445,27 @@ Use null for any field not found.`;
         ? { type:"image", source:{ type:"base64", media_type:mediaType, data:base64 } }
         : { type:"document", source:{ type:"base64", media_type:"application/pdf", data:base64 } };
       const response = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST", headers:{"Content-Type":"application/json"},
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-api-key": key,
+          "anthropic-version":"2023-06-01",
+          "anthropic-dangerous-direct-browser-access":"true",
+        },
         body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:2000, system:systemPrompt,
           messages:[{ role:"user", content:[contentBlock,{type:"text",text:"Extract all crane/lifting equipment data from this document."}] }] }),
       });
+      if (!response.ok) {
+        const errData = await response.json().catch(()=>({}));
+        throw new Error(errData?.error?.message || "API error " + response.status + " — check your API key is valid and has credits.");
+      }
       const data = await response.json();
       const text = data.content?.map(i=>i.text||"").join("")||"";
       const clean = text.replace(/```json|```/g,"").trim();
       setCraneData(JSON.parse(clean));
-    } catch(e) { setError("Failed to analyse document: "+e.message); }
+    } catch(e) { setError(e.message); }
     finally { setLoading(false); }
-  }, []);
+  }, [apiKey]);
 
   const handleDrop = useCallback((e)=>{ e.preventDefault(); const f=e.dataTransfer.files[0]; if(f) handleFileUpload(f); },[handleFileUpload]);
 
@@ -1450,6 +1476,33 @@ Use null for any field not found.`;
           <h2 style={{fontFamily:"var(--font-display)",fontSize:22,fontWeight:800,color:"#f59e0b",margin:0,letterSpacing:2}}>CRANE DATA SHEET ANALYSIS</h2>
           <p style={{color:"#64748b",fontSize:12,margin:"4px 0 0",letterSpacing:1,fontFamily:"var(--font-mono)"}}>Upload a crane data sheet (PDF or image) — AI extracts all technical parameters automatically</p>
         </div>
+
+        {/* API KEY INPUT */}
+        <div style={{background:"#07111f",border:"1px solid #1e3a5f",borderLeft:"3px solid #f59e0b",borderRadius:"0 8px 8px 0",padding:"16px 20px",marginBottom:20}}>
+          <div style={{fontFamily:"var(--font-display)",fontSize:12,fontWeight:700,color:"#f59e0b",letterSpacing:3,marginBottom:10}}>🔑 ANTHROPIC API KEY</div>
+          <p style={{fontSize:11,color:"#64748b",fontFamily:"var(--font-mono)",marginBottom:12,lineHeight:1.7}}>
+            Required for AI analysis. Get a free key at <a href="https://console.anthropic.com" target="_blank" rel="noreferrer" style={{color:"#22d3ee"}}>console.anthropic.com</a> → API Keys. Stored in your browser only — never sent anywhere except Anthropic directly.
+          </p>
+          <div style={{display:"flex",gap:8,alignItems:"center",flexWrap:"wrap"}}>
+            <input
+              type={keyVisible ? "text" : "password"}
+              placeholder="sk-ant-api03-..."
+              value={apiKey}
+              onChange={e=>setApiKey(e.target.value)}
+              onKeyDown={e=>{ if(e.key==="Enter") saveKey(); }}
+              style={{flex:1,minWidth:240,background:"#0d1f35",border:"1px solid #1e3a5f",color:"#e2e8f0",borderRadius:4,padding:"8px 12px",fontFamily:"var(--font-mono)",fontSize:12,outline:"none"}}
+            />
+            <button onClick={()=>setKeyVisible(v=>!v)}
+              style={{background:"#0d1f35",border:"1px solid #1e3a5f",color:"#64748b",borderRadius:4,padding:"8px 12px",cursor:"pointer",fontFamily:"var(--font-mono)",fontSize:11}}>
+              {keyVisible ? "Hide" : "Show"}
+            </button>
+            <button onClick={saveKey}
+              style={{background:keySaved?"#052e16":"#0d2240",border:"1px solid "+(keySaved?"#22d3ee":"#f59e0b"),color:keySaved?"#22d3ee":"#f59e0b",borderRadius:4,padding:"8px 18px",cursor:"pointer",fontFamily:"var(--font-display)",fontWeight:700,fontSize:13,letterSpacing:1,transition:"all 0.2s"}}>
+              {keySaved ? "✓ SAVED" : "SAVE KEY"}
+            </button>
+          </div>
+        </div>
+
         <div className="upload-zone" onDragOver={e=>e.preventDefault()} onDrop={handleDrop} onClick={()=>fileInputRef.current?.click()}>
           <input ref={fileInputRef} type="file" accept=".pdf,image/*" style={{display:"none"}} onChange={e=>handleFileUpload(e.target.files[0])}/>
           {loading ? (
