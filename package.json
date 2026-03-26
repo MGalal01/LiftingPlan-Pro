@@ -1,0 +1,38 @@
+{
+  "name": "liftplan-pro",
+  "version": "1.0.0",
+  "description": "LEEA-compliant lifting plan management portal with AI crane data sheet analyser",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx"
+  },
+  "keywords": [
+    "lifting-engineer",
+    "LEEA",
+    "LOLER",
+    "crane",
+    "rigging",
+    "lifting-plan",
+    "appointed-person",
+    "BS7121",
+    "sling-calculator",
+    "load-chart",
+    "react",
+    "vite"
+  ],
+  "author": "Mahmoud Elsayed",
+  "license": "MIT",
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.2"
+  }
+}
