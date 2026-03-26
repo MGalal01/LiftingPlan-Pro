@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiftPlan Pro — LEEA Lifting Operations Portal</title>
+  <meta name="description" content="Free, open-source LEEA-compliant lifting plan portal for Appointed Persons, riggers and lifting engineers." />
+
+  <!-- Open Graph for LinkedIn preview -->
+  <meta property="og:title" content="LiftPlan Pro — LEEA Lifting Operations Portal" />
+  <meta property="og:description" content="Free open-source lifting plan wizard, crane database, LEEA accessories library and AI crane data sheet analyser." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:    #0d1b2e;
+      --navy2:   #121f35;
+      --navy3:   #1a2d4a;
+      --border:  #1e3a5f;
+      --yellow:  #f5c300;
+      --yellow2: #ffd740;
+      --cyan:    #22d3ee;
+      --green:   #2ecc71;
+      --red:     #ef4444;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --subtle:  #94a3b8;
+      --fd: 'Barlow Condensed', sans-serif;
+      --fb: 'Barlow', sans-serif;
+      --fm: 'JetBrains Mono', monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--navy);
+      color: var(--text);
+      font-family: var(--fb);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GRID BACKGROUND ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(30,58,95,0.35) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30,58,95,0.35) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,27,46,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--yellow);
+      padding: 0 40px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      font-family: var(--fd); font-weight: 800; font-size: 20px;
+      color: var(--yellow); letter-spacing: 2px; text-transform: uppercase;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 36px; height: 36px; background: var(--yellow);
+      border-radius: 5px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 900; color: var(--navy);
+    }
+    .nav-links { display: flex; gap: 8px; align-items: center; }
+    .nav-link {
+      color: var(--muted); font-family: var(--fd); font-size: 13px;
+      font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      text-decoration: none; padding: 6px 12px; border-radius: 4px;
+      transition: color .15s;
+    }
+    .nav-link:hover { color: var(--yellow); }
+    .nav-cta {
+      background: var(--yellow); color: var(--navy);
+      font-family: var(--fd); font-size: 13px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 8px 20px; border-radius: 4px; text-decoration: none;
+      transition: background .15s, transform .15s;
+    }
+    .nav-cta:hover { background: var(--yellow2); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      min-height: 92vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 24px 60px;
+      overflow: hidden;
+    }
+
+    /* animated glow rings */
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      border: 1px solid rgba(245,195,0,0.08);
+      box-shadow: 0 0 80px rgba(245,195,0,0.04) inset;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      animation: ring-pulse 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes ring-pulse {
+      0%,100% { transform: translate(-50%,-50%) scale(1); opacity: .6; }
+      50%      { transform: translate(-50%,-50%) scale(1.08); opacity: 1; }
+    }
+
+    .hero-eyebrow {
+      font-family: var(--fm); font-size: 11px; color: var(--cyan);
+      letter-spacing: 4px; text-transform: uppercase;
+      border: 1px solid rgba(34,211,238,0.25);
+      background: rgba(34,211,238,0.06);
+      padding: 5px 16px; border-radius: 20px;
+      margin-bottom: 28px;
+      animation: fadeUp .6s ease forwards;
+    }
+
+    .hero-title {
+      font-family: var(--fd); font-weight: 900;
+      font-size: clamp(52px, 8vw, 100px);
+      line-height: .92;
+      letter-spacing: -1px;
+      color: var(--text);
+      margin-bottom: 8px;
+      animation: fadeUp .6s .1s ease both;
+    }
+    .hero-title span { color: var(--yellow); }
+
+    .hero-sub {
+      font-family: var(--fd); font-size: clamp(18px, 3vw, 28px);
+      font-weight: 600; color: var(--muted);
+      letter-spacing: 3px; text-transform: uppercase;
+      margin-bottom: 28px;
+      animation: fadeUp .6s .2s ease both;
+    }
+
+    .hero-desc {
+      max-width: 640px; font-size: 16px; line-height: 1.7;
+      color: var(--subtle); margin-bottom: 44px;
+      animation: fadeUp .6s .3s ease both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+      animation: fadeUp .6s .4s ease both;
+    }
+    .btn-hero-primary {
+      background: var(--yellow); color: var(--navy);
+      font-family: var(--fd); font-size: 16px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 16px 36px; border-radius: 5px; text-decoration: none;
+      box-shadow: 0 0 32px rgba(245,195,0,0.25);
+      transition: all .2s;
+    }
+    .btn-hero-primary:hover { background: var(--yellow2); transform: translateY(-2px); box-shadow: 0 0 48px rgba(245,195,0,0.4); }
+
+    .btn-hero-ghost {
+      background: transparent; color: var(--subtle);
+      border: 1px solid var(--border);
+      font-family: var(--fd); font-size: 15px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 15px 32px; border-radius: 5px; text-decoration: none;
+      transition: all .2s;
+    }
+    .btn-hero-ghost:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    .hero-badges {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+      margin-top: 52px;
+      animation: fadeUp .6s .5s ease both;
+    }
+    .badge {
+      font-family: var(--fm); font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 4px 12px; border-radius: 3px; border: 1px solid;
+    }
+    .badge-yellow { border-color: rgba(245,195,0,0.4); color: var(--yellow); background: rgba(245,195,0,0.06); }
+    .badge-cyan   { border-color: rgba(34,211,238,0.4); color: var(--cyan);   background: rgba(34,211,238,0.06); }
+    .badge-green  { border-color: rgba(46,204,113,0.4); color: var(--green);  background: rgba(46,204,113,0.06); }
+
+    /* ── SECTION COMMONS ── */
+    section { position: relative; z-index: 1; padding: 96px 24px; }
+    .container { max-width: 1100px; margin: 0 auto; }
+    .section-label {
+      font-family: var(--fm); font-size: 11px; color: var(--cyan);
+      letter-spacing: 4px; text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-title {
+      font-family: var(--fd); font-size: clamp(32px,5vw,54px);
+      font-weight: 800; line-height: 1; margin-bottom: 16px; color: var(--text);
+    }
+    .section-title span { color: var(--yellow); }
+    .section-desc { font-size: 16px; color: var(--subtle); max-width: 560px; line-height: 1.7; }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px; margin-top: 56px;
+    }
+    .feature-card {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 28px;
+      transition: border-color .2s, transform .2s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--yellow), transparent);
+      opacity: 0; transition: opacity .2s;
+    }
+    .feature-card:hover { border-color: rgba(245,195,0,0.4); transform: translateY(-4px); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon { font-size: 32px; margin-bottom: 16px; }
+    .feature-title {
+      font-family: var(--fd); font-size: 20px; font-weight: 700;
+      color: var(--yellow); letter-spacing: 1px; margin-bottom: 10px;
+    }
+    .feature-desc { font-size: 14px; color: var(--subtle); line-height: 1.6; }
+    .feature-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .feature-tag {
+      font-family: var(--fm); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 2px;
+      background: rgba(245,195,0,0.08); color: var(--yellow);
+      border: 1px solid rgba(245,195,0,0.2);
+    }
+
+    /* ── STANDARDS ── */
+    .standards-section { background: var(--navy2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .standards-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+      gap: 14px; margin-top: 48px;
+    }
+    .std-card {
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: 8px; padding: 20px;
+      display: flex; align-items: flex-start; gap: 14px;
+    }
+    .std-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--yellow); flex-shrink: 0; margin-top: 5px; }
+    .std-name { font-family: var(--fd); font-size: 15px; font-weight: 700; color: var(--yellow); margin-bottom: 3px; }
+    .std-desc { font-size: 12px; color: var(--muted); font-family: var(--fm); }
+
+    /* ── CRANES ── */
+    .crane-table-wrap { margin-top: 48px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th {
+      background: var(--navy3); color: var(--yellow);
+      font-family: var(--fd); font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border);
+    }
+    td { padding: 12px 16px; border-bottom: 1px solid rgba(30,58,95,0.5); color: var(--subtle); }
+    tr:hover td { background: rgba(30,58,95,0.3); }
+    .td-name { color: var(--text); font-weight: 600; }
+    .td-swl { color: var(--cyan); font-family: var(--fm); font-weight: 700; }
+    .type-badge {
+      font-family: var(--fm); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 2px 7px; border-radius: 2px;
+      background: rgba(245,195,0,0.1); color: var(--yellow);
+      border: 1px solid rgba(245,195,0,0.25);
+    }
+
+    /* ── CONTRIBUTE ── */
+    .contribute-section { text-align: center; }
+    .contribute-box {
+      background: var(--navy2);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--yellow);
+      border-radius: 12px;
+      padding: 64px 48px;
+      margin-top: 56px;
+      position: relative; overflow: hidden;
+    }
+    .contribute-box::before {
+      content: '';
+      position: absolute; bottom: -60px; right: -60px;
+      width: 250px; height: 250px; border-radius: 50%;
+      background: rgba(245,195,0,0.03);
+      border: 40px solid rgba(245,195,0,0.04);
+    }
+    .contribute-title {
+      font-family: var(--fd); font-size: clamp(28px,5vw,48px);
+      font-weight: 900; color: var(--text); margin-bottom: 16px; line-height: 1;
+    }
+    .contribute-desc { font-size: 16px; color: var(--subtle); max-width: 540px; margin: 0 auto 36px; line-height: 1.7; }
+    .contribute-ways {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+      gap: 12px; margin-bottom: 40px; text-align: left;
+    }
+    .way-item {
+      background: var(--navy); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px 18px;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .way-icon { font-size: 20px; flex-shrink: 0; }
+    .way-text { font-size: 13px; color: var(--subtle); line-height: 1.5; }
+    .way-text strong { display: block; color: var(--text); font-family: var(--fd); font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+
+    .contribute-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-github {
+      background: var(--yellow); color: var(--navy);
+      font-family: var(--fd); font-size: 15px; font-weight: 800;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 14px 32px; border-radius: 5px; text-decoration: none;
+      transition: all .2s; display: flex; align-items: center; gap: 8px;
+    }
+    .btn-github:hover { background: var(--yellow2); transform: translateY(-2px); }
+    .btn-issue {
+      background: transparent; color: var(--subtle);
+      border: 1px solid var(--border);
+      font-family: var(--fd); font-size: 14px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 13px 28px; border-radius: 5px; text-decoration: none;
+      transition: all .2s; display: flex; align-items: center; gap: 8px;
+    }
+    .btn-issue:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* ── AUTHOR ── */
+    .author-section { border-top: 1px solid var(--border); }
+    .author-card {
+      background: var(--navy2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 40px 48px;
+      display: flex; align-items: center; gap: 40px;
+      flex-wrap: wrap;
+    }
+    .author-avatar {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--yellow); display: flex; align-items: center;
+      justify-content: center; font-family: var(--fd); font-size: 32px;
+      font-weight: 900; color: var(--navy); flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(245,195,0,0.2);
+    }
+    .author-info { flex: 1; min-width: 200px; }
+    .author-name { font-family: var(--fd); font-size: 28px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+    .author-role { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    .author-certs { display: flex; gap: 8px; flex-wrap: wrap; }
+    .cert-tag {
+      font-family: var(--fm); font-size: 10px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 3px;
+      background: rgba(245,195,0,0.1); color: var(--yellow);
+      border: 1px solid rgba(245,195,0,0.25);
+    }
+    .author-links { display: flex; gap: 10px; flex-wrap: wrap; }
+    .author-link {
+      font-family: var(--fd); font-size: 13px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 8px 18px; border-radius: 4px; text-decoration: none;
+      border: 1px solid var(--border); color: var(--muted);
+      transition: all .2s;
+    }
+    .author-link:hover { border-color: var(--yellow); color: var(--yellow); }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      background: rgba(239,68,68,0.04);
+      border: 1px solid rgba(239,68,68,0.2);
+      border-left: 3px solid var(--red);
+      border-radius: 6px; padding: 16px 20px;
+      font-family: var(--fm); font-size: 11px; color: rgba(239,68,68,0.8);
+      line-height: 1.6; margin-top: 48px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 40px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      position: relative; z-index: 1;
+    }
+    .footer-left { font-family: var(--fm); font-size: 10px; color: var(--muted); letter-spacing: 2px; }
+    .footer-right { display: flex; gap: 6px; }
+    .footer-badge {
+      font-family: var(--fm); font-size: 9px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 8px; border-radius: 2px; border: 1px solid var(--border); color: var(--muted);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      section { padding: 64px 20px; }
+      .contribute-box { padding: 40px 24px; }
+      .author-card { padding: 28px 24px; }
+      footer { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-icon">AP</div>
+      LiftPlan Pro
+    </a>
+    <div class="nav-links">
+      <a href="#features"   class="nav-link">Features</a>
+      <a href="#standards"  class="nav-link">Standards</a>
+      <a href="#cranes"     class="nav-link">Crane DB</a>
+      <a href="#contribute" class="nav-link">Contribute</a>
+      <a href="https://github.com/YOUR_USERNAME/liftplan-pro" target="_blank" class="nav-cta">⭐ Star on GitHub</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">Open Source · Free Forever · Built for the Industry</div>
+    <h1 class="hero-title">
+      Lift<span>Plan</span><br>Pro
+    </h1>
+    <p class="hero-sub">LEEA Lifting Operations Portal</p>
+    <p class="hero-desc">
+      A professional, LOLER-compliant lifting plan management system built for
+      Appointed Persons, riggers and lifting engineers — with a built-in crane database,
+      LEEA accessories library and AI-powered data sheet analyser.
+    </p>
+    <div class="hero-btns">
+      <a href="https://github.com/YOUR_USERNAME/liftplan-pro" target="_blank" class="btn-hero-primary">
+        ⭐ View on GitHub
+      </a>
+      <a href="https://liftplan-pro.vercel.app" target="_blank" class="btn-hero-ghost">
+        🌐 Live Demo →
+      </a>
+    </div>
+    <div class="hero-badges">
+      <span class="badge badge-yellow">LOLER 1998</span>
+      <span class="badge badge-yellow">BS 7121</span>
+      <span class="badge badge-yellow">LEEA Compliant</span>
+      <span class="badge badge-cyan">EN 13414 · EN 818</span>
+      <span class="badge badge-cyan">EN 1492 · EN 13889</span>
+      <span class="badge badge-green">MIT Licence · Free</span>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="container">
+      <div class="section-label">What's inside</div>
+      <h2 class="section-title">Everything an <span>AP needs</span><br>on one screen</h2>
+      <p class="section-desc">From first risk assessment to final digital sign-off — built to the exact standards you work to every day.</p>
+
+      <div class="features-grid">
+
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <div class="feature-title">8-Step Plan Wizard</div>
+          <div class="feature-desc">Project details, personnel (CPCS/LEEA certs), load & CoG, equipment selection, lift zone, risk matrix, method statement and digital sign-off — all in one guided flow.</div>
+          <div class="feature-tags"><span class="feature-tag">LOLER 1998</span><span class="feature-tag">BS 7121</span><span class="feature-tag">Digital Sign-Off</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🏗️</div>
+          <div class="feature-title">Crane Database</div>
+          <div class="feature-desc">8 crane models with full load chart data. Select any radius and get interpolated capacity instantly — colour-coded utilisation status at a glance.</div>
+          <div class="feature-tags"><span class="feature-tag">Liebherr</span><span class="feature-tag">Demag</span><span class="feature-tag">Load Chart Interpolation</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⚖️</div>
+          <div class="feature-title">Live Capacity Calculator</div>
+          <div class="feature-desc">Drag the radius slider — watch capacity, utilisation % and headroom update in real time against the actual load weight. Instant red/amber/green status.</div>
+          <div class="feature-tags"><span class="feature-tag">Real-Time</span><span class="feature-tag">SWL Verification</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">⛓️</div>
+          <div class="feature-title">LEEA Accessories Library</div>
+          <div class="feature-desc">Complete SWL tables for wire rope slings, chain slings, flat & round webbing, shackles, eye bolts and lifting hooks — all grades, all angles.</div>
+          <div class="feature-tags"><span class="feature-tag">EN 13414</span><span class="feature-tag">EN 818</span><span class="feature-tag">EN 1492</span><span class="feature-tag">EN 13889</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📐</div>
+          <div class="feature-title">Load Calculator</div>
+          <div class="feature-desc">Set number of legs, sling angle, dynamic factor — get tension per leg and utilisation % instantly. Live SVG rigging diagram updates as you type.</div>
+          <div class="feature-tags"><span class="feature-tag">Sling Tension</span><span class="feature-tag">De-Rating</span><span class="feature-tag">Dynamic Factor</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🤖</div>
+          <div class="feature-title">AI Crane Analyser</div>
+          <div class="feature-desc">Drop any crane data sheet — PDF or photo. Claude AI reads it and extracts SWL charts, speeds, duty cycle, safety devices and certifications automatically.</div>
+          <div class="feature-tags"><span class="feature-tag">Claude AI</span><span class="feature-tag">PDF Upload</span><span class="feature-tag">Auto Extract</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📐</div>
+          <div class="feature-title">Sling Angle Visualiser</div>
+          <div class="feature-desc">Interactive diagram — move the angle slider and watch de-rating factor and leg tension recalculate instantly. Clear visual of what happens below 45°.</div>
+          <div class="feature-tags"><span class="feature-tag">De-Rating</span><span class="feature-tag">Visual Aid</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <div class="feature-title">Pre-Lift Checklist</div>
+          <div class="feature-desc">14-point LEEA pre-lift checklist embedded in the sidebar — always visible during plan creation. Progress bar tracks completion in real time.</div>
+          <div class="feature-tags"><span class="feature-tag">LEEA</span><span class="feature-tag">14-Point Check</span></div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌤️</div>
+          <div class="feature-title">Weather Monitor</div>
+          <div class="feature-desc">Live wind-speed input with automatic flag: OK / Monitor / SUSPEND LIFT at the 38 km/h LEEA operational threshold. Temperature and visibility tracking.</div>
+          <div class="feature-tags"><span class="feature-tag">38 km/h Threshold</span><span class="feature-tag">Go / No-Go</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- STANDARDS -->
+  <section id="standards" class="standards-section">
+    <div class="container">
+      <div class="section-label">Compliance</div>
+      <h2 class="section-title">Built to the <span>standards</span><br>that matter</h2>
+      <div class="standards-grid">
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">LOLER 1998</div><div class="std-desc">Lifting Operations & Lifting Equipment Regulations</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">BS 7121</div><div class="std-desc">Code of Practice for Safe Use of Cranes</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">EN 13414-1</div><div class="std-desc">Wire Rope Sling Safety Requirements</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">EN 818-2/4</div><div class="std-desc">Short Link Chain & Chain Slings for Lifting</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">EN 1492-1/2</div><div class="std-desc">Flat Webbing & Round Slings</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">EN 13889</div><div class="std-desc">Forged Steel Shackles for General Lifting</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">BS 4278</div><div class="std-desc">Eyebolts for Lifting Purposes</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">EN 1677-1</div><div class="std-desc">Components for Slings — Forged Steel Hooks</div></div></div>
+        <div class="std-card"><div class="std-dot"></div><div><div class="std-name">PUWER 1998</div><div class="std-desc">Provision and Use of Work Equipment Regs</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CRANE DATABASE -->
+  <section id="cranes">
+    <div class="container">
+      <div class="section-label">Fleet</div>
+      <h2 class="section-title">Crane <span>database</span></h2>
+      <p class="section-desc">All models include verified load chart data with linear interpolation at any working radius. More models added with every community contribution.</p>
+
+      <div class="crane-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Crane Model</th>
+              <th>Type</th>
+              <th>Max SWL</th>
+              <th>Configurations</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="td-name">Liebherr LTM 1500-8.1</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">500 T</td><td>3 configs incl. 75% outrigger</td></tr>
+            <tr><td class="td-name">Liebherr LTM 1300-6.2</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">300 T</td><td>2 configs — 60m & 45m boom</td></tr>
+            <tr><td class="td-name">Liebherr LTM 1100-5.2</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">100 T</td><td>2 configs — 52m & 35m boom</td></tr>
+            <tr><td class="td-name">Liebherr LTM 1090-4.2</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">90 T</td><td>3 configs incl. 75% outrigger</td></tr>
+            <tr><td class="td-name">Demag AC 50-1</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">50 T</td><td>3 configs incl. 75% outrigger</td></tr>
+            <tr><td class="td-name">Demag AC 300-6</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">300 T</td><td>2 configs — 60m & 45m boom</td></tr>
+            <tr><td class="td-name">Demag AC 700-9</td><td><span class="type-badge">Mobile</span></td><td class="td-swl">700 T</td><td>1 config — 84m super-lift</td></tr>
+            <tr><td class="td-name">Liebherr LG 1750</td><td><span class="type-badge">Lattice</span></td><td class="td-swl">750 T</td><td>1 config — 84m SSL</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTRIBUTE -->
+  <section id="contribute" class="contribute-section">
+    <div class="container">
+      <div class="section-label">Open Source</div>
+      <h2 class="section-title">Built by engineers,<br>for <span>engineers</span></h2>
+
+      <div class="contribute-box">
+        <h3 class="contribute-title">Want to improve it?<br>You're welcome here.</h3>
+        <p class="contribute-desc">
+          This project is open source and actively looking for contributions from the lifting engineering community.
+          Whether you're an AP, a rigging supervisor, or a software engineer who works in the industry — your input shapes this tool.
+        </p>
+
+        <div class="contribute-ways">
+          <div class="way-item">
+            <div class="way-icon">🏗️</div>
+            <div class="way-text"><strong>Add Crane Models</strong>Submit load chart data for cranes not yet in the database.</div>
+          </div>
+          <div class="way-item">
+            <div class="way-icon">📋</div>
+            <div class="way-text"><strong>Improve Standards</strong>Flag outdated EN/BS data or suggest missing standards coverage.</div>
+          </div>
+          <div class="way-item">
+            <div class="way-icon">🐛</div>
+            <div class="way-text"><strong>Report Bugs</strong>Found a calculation error or UI issue? Open a GitHub issue.</div>
+          </div>
+          <div class="way-item">
+            <div class="way-icon">🌍</div>
+            <div class="way-text"><strong>Translate</strong>Help translate the interface — Arabic, French, German needed.</div>
+          </div>
+          <div class="way-item">
+            <div class="way-icon">📄</div>
+            <div class="way-text"><strong>PDF Export</strong>Build a print-ready LOLER-compliant PDF output from the plan.</div>
+          </div>
+          <div class="way-item">
+            <div class="way-icon">💡</div>
+            <div class="way-text"><strong>Feature Ideas</strong>Anything you wish existed in a lifting plan tool — suggest it.</div>
+          </div>
+        </div>
+
+        <div class="contribute-btns">
+          <a href="https://github.com/YOUR_USERNAME/liftplan-pro" target="_blank" class="btn-github">⭐ Star &amp; Fork on GitHub</a>
+          <a href="https://github.com/YOUR_USERNAME/liftplan-pro/issues/new" target="_blank" class="btn-issue">🐛 Open an Issue</a>
+          <a href="https://linkedin.com/in/mahmoud-galal-0a771a146" target="_blank" class="btn-issue">💼 Connect on LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTHOR -->
+  <section class="author-section">
+    <div class="container">
+      <div class="section-label">About the author</div>
+      <div class="author-card">
+        <div class="author-avatar">ME</div>
+        <div class="author-info">
+          <div class="author-name">Mahmoud Elsayed</div>
+          <div class="author-role">Mechanical Engineer · Lifting Equipment Specialist · CFD Engineer</div>
+          <div class="author-certs">
+            <span class="cert-tag">LEEA-AP-04421</span>
+            <span class="cert-tag">CMIOSH</span>
+            <span class="cert-tag">CPCS A62</span>
+            <span class="cert-tag">ANSYS Fluent</span>
+            <span class="cert-tag">OpenFOAM</span>
+          </div>
+        </div>
+        <div class="author-links">
+          <a href="https://linkedin.com/in/mahmoud-galal-0a771a146" target="_blank" class="author-link">💼 LinkedIn</a>
+          <a href="https://github.com/YOUR_USERNAME/liftplan-pro" target="_blank" class="author-link">⭐ GitHub</a>
+        </div>
+      </div>
+
+      <div class="disclaimer">
+        ⚠️ DISCLAIMER — This application is a technical reference and planning aid only. All lifting operations must be planned by a competent Appointed Person under LOLER 1998,
+        verified against the actual manufacturer's certified load chart on site, and conducted under qualified supervision with all applicable permits to work.
+        Load chart data is indicative and must never substitute certified manufacturer documentation.
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-left">LIFTPLAN PRO · MIT LICENCE · OPEN SOURCE</div>
+    <div class="footer-right">
+      <span class="footer-badge">LOLER 1998</span>
+      <span class="footer-badge">BS 7121</span>
+      <span class="footer-badge">LEEA</span>
+      <span class="footer-badge">EN 13414</span>
+    </div>
+  </footer>
+
+</body>
+</html>
